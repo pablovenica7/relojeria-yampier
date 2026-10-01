@@ -1,0 +1,88 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: yampier-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: relojeria_yampier
+    volumes:
+      # Volumen nombrado por Docker: los datos de Mongo persisten entre reinicios
+      # pero NO forman parte del repositorio ni se suben a GitHub.
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+    container_name: yampier-backend
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: relojeria_yampier
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:5173}
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET es obligatorio, definilo en el .env de la raiz}"
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      # Seguro por defecto: sin APP_ENV explícito se asume producción y no se
+      # cargan datos demo aunque SEED_DEMO_DATA sea true.
+      APP_ENV: ${APP_ENV:-production}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      RESERVATION_SWEEP_INTERVAL: ${RESERVATION_SWEEP_INTERVAL:-5m}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:5173}
+      MAIL_DRIVER: ${MAIL_DRIVER:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      UPLOADS_DIR: /app/uploads
+    volumes:
+      # Las imágenes subidas desde el panel Admin persisten acá, tampoco van a git.
+      - backend-uploads:/app/uploads
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api}
+        VITE_WHATSAPP_NUMBER: ${VITE_WHATSAPP_NUMBER:-}
+        VITE_CONTACT_EMAIL: ${VITE_CONTACT_EMAIL:-}
+        VITE_INSTAGRAM_URL: ${VITE_INSTAGRAM_URL:-}
+        VITE_FACEBOOK_URL: ${VITE_FACEBOOK_URL:-}
+    container_name: yampier-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  mongo-data:
+  backend-uploads:

@@ -1,0 +1,28 @@
+/**
+ * Animations — keyframes reutilizados por componentes (skeleton, marquee,
+ * loader, indicador de scroll). Las animaciones de entrada por scroll viven
+ * en JS (Motion) porque necesitan disparar según viewport, no CSS puro.
+ */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes loaderSweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -1,0 +1,46 @@
+# Dependencias y builds
+node_modules/
+dist/
+
+# Variables de entorno y secretos: NUNCA se suben a git.
+# Se versionan solo las plantillas .env.example (sin secretos reales).
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# Binarios y archivos generados por Go
+backend/server
+*.exe
+*.exe~
+*.test
+*.out
+
+# Imágenes subidas en desarrollo local (en Docker viven en un volumen aparte)
+backend/uploads/
+uploads/
+
+# Backups de MongoDB / imágenes generados con los comandos del README
+# (contienen datos personales: nunca al repositorio)
+*.archive
+*.archive.gz
+uploads-*.tgz
+*.bson
+
+# Logs y temporales
+*.log
+npm-debug.log*
+*.tmp
+*.swp
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Tests / linters
+coverage/
+.eslintcache
