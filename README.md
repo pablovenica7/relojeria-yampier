@@ -9,6 +9,9 @@ pago final se hace en persona.
 
 ## Estructura
 
+La arquitectura interna del backend (capas, carpetas, reglas y tests) está en
+[`backend/README.md`](backend/README.md).
+
 ```
 relojeria-yampier/
 ├── backend/     API en Go (net/http + MongoDB)
@@ -78,10 +81,10 @@ Necesitás **Go 1.22+**, **Node 18+** y **MongoDB** corriendo en `localhost:2701
 cd backend
 cp .env.example .env      # completá JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
 go mod tidy                # descarga las dependencias y genera go.sum
-go run .
+go run ./cmd/api
 ```
 El backend carga `backend/.env` automáticamente (con [godotenv](https://github.com/joho/godotenv))
-al ejecutar `go run .`, así que con copiar el archivo alcanza — no hace falta
+al ejecutar `go run ./cmd/api`, así que con copiar el archivo alcanza — no hace falta
 exportar las variables a mano en la terminal. En Docker esto no aplica: ahí
 las variables llegan directo del `environment:` de `docker-compose.yml`.
 
@@ -226,7 +229,7 @@ operación atómica de siempre) → seña si corresponde → pago y retiro en el
 - **Consentimientos**: privacidad obligatoria (`privacyAcceptedAt`,
   `privacyVersion`); promociones opcional y revocable (`marketingConsent`,
   `marketingConsentAt`); términos al reservar (`termsAcceptedAt`,
-  `termsVersion`). Las versiones están en `backend/customers.go` y
+  `termsVersion`). Las versiones están en `backend/internal/domain/customer.go` y
   `frontend/src/utils/legal.js` (actualizar ambas si cambia un texto).
 - **Privacidad de datos**: un cliente solo ve sus reservas (una reserva ajena
   responde 404); la vista del cliente no incluye notas internas; los datos
@@ -326,7 +329,9 @@ es estable para que el cliente reaccione sin comparar textos. Genéricos:
 
 - `GET /api/health` → `{"status":"ok","database":"ok"}` (200) o
   `{"status":"degraded","database":"unavailable"}` (503). No expone URI ni datos internos.
-- Cada request se loguea en una línea: `GET /api/watches 200 23ms ip=… request_id=…`.
+- Cada request se loguea en una línea estructurada (`log/slog`):
+  `level=INFO msg=request method=GET path=/api/watches status=200 duration_ms=23 ip=… request_id=…`.
+  Los panics se convierten en un 500 seguro (stack solo en el log).
   El request ID también vuelve en el header `X-Request-ID`. Nunca se loguean
   headers (JWT), cuerpos (contraseñas, datos personales) ni query strings.
 
@@ -480,7 +485,7 @@ muestra como SKIP). Para correrlos: `docker compose up -d mongo`.
 - Subida de imágenes: se valida el contenido real del archivo (`http.DetectContentType`),
   no solo la extensión del nombre; el nombre final siempre lo genera el servidor.
 - Rate limiting en memoria sobre `POST /api/admin/login` y `POST /api/inquiries`
-  (ver limitación de instancia única documentada en `backend/ratelimit.go`), con
+  (ver limitación de instancia única documentada en `backend/internal/middleware/ratelimit.go`), con
   soporte opcional de proxy confiable (`TRUSTED_PROXIES`).
 - Toda validación importante (precio, stock, modelo, estados, IDs, longitudes,
   seña, fechas) vive en el backend, no solo en el frontend.

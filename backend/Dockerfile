@@ -4,7 +4,7 @@ WORKDIR /app
 COPY go.mod go.sum* ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/api
 
 # --- Imagen final, liviana ---
 FROM alpine:3.20
