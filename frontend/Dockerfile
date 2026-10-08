@@ -2,10 +2,8 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-# Usa `npm ci` (instalación reproducible y más rápida) en cuanto el proyecto
-# tenga package-lock.json commiteado. Sin lockfile en el repo, `npm ci` falla,
-# así que por ahora se usa `npm install`.
-RUN npm install
+# Instalación reproducible desde package-lock.json.
+RUN npm ci
 COPY . .
 # La URL de la API se fija al momento del build (Vite la incrusta en el bundle).
 ARG VITE_API_URL=http://localhost:8080/api

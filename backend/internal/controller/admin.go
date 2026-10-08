@@ -135,7 +135,7 @@ func (h *AdminHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	url, err := h.uploads.SaveImage(file)
+	url, err := h.uploads.SaveImage(r.Context(), file)
 	if err != nil {
 		httpx.WriteError(w, r, err)
 		return

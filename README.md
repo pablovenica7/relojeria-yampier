@@ -10,13 +10,15 @@ pago final se hace en persona.
 ## Estructura
 
 La arquitectura interna del backend (capas, carpetas, reglas y tests) está en
-[`backend/README.md`](backend/README.md).
+[`backend/README.md`](backend/README.md). La publicación en Internet
+(Render + MongoDB Atlas, dominio, backups) está en [`DEPLOY.md`](DEPLOY.md).
 
 ```
 relojeria-yampier/
 ├── backend/     API en Go (net/http + MongoDB)
 ├── frontend/    Sitio público + panel Admin en React (Vite)
-└── docker-compose.yml
+├── docker-compose.yml   desarrollo local con Docker
+└── render.yaml          deploy de producción en Render (ver DEPLOY.md)
 ```
 
 **Stack:** React 18 + Vite + React Router (frontend), Go 1.22 con `net/http`
@@ -68,8 +70,11 @@ relojeria-yampier/
    - Panel Admin: http://localhost:5173/admin/login (con el email y password del `.env`)
    - Estado de la API: http://localhost:8080/api/health
 
-Los datos de MongoDB y las imágenes subidas quedan en volúmenes de Docker
-(`mongo-data`, `backend-uploads`), separados del código: no se suben a git.
+Los datos de MongoDB quedan en el volumen de Docker `mongo-data`, separado del
+código: no se sube a git. Las imágenes subidas desde el Admin se guardan dentro
+de MongoDB (GridFS, colecciones `uploads.files`/`uploads.chunks`), así que
+viajan con la base y con sus backups. El volumen `backend-uploads` solo se lee
+al arrancar para migrar a la base imágenes de versiones anteriores.
 
 ## Opción 2: correr en desarrollo, sin Docker
 
@@ -394,7 +399,8 @@ se desactivan: no pueden iniciar sesión, sus sesiones se cierran
 Estrategia mínima recomendada:
 
 - **Qué**: la base `relojeria_yampier` completa (catálogo, reservas, clientes,
-  consultas, movimientos) y el volumen de imágenes subidas (`backend-uploads`).
+  consultas, movimientos **e imágenes subidas**, que viven en GridFS dentro de la
+  misma base). En producción con Atlas, ver [`DEPLOY.md`](DEPLOY.md#backups).
 - **Frecuencia**: diaria (de noche) + antes de cada actualización del sistema.
   Conservar al menos 7 diarios y 4 semanales, **fuera del servidor**.
 - **Verificación**: una vez por mes, restaurar un backup en una base de prueba
@@ -412,9 +418,6 @@ docker exec yampier-mongo mongodump --db relojeria_yampier --archive --gzip > ba
 docker exec -i yampier-mongo mongorestore --archive --gzip \
   --nsFrom='relojeria_yampier.*' --nsTo='relojeria_restore_test.*' < backup-AAAA-MM-DD.archive.gz
 docker exec yampier-mongo mongosh --quiet relojeria_restore_test --eval 'db.getCollectionNames().map(c => c + ": " + db[c].countDocuments())'
-
-# Imágenes subidas
-docker run --rm -v relojeria-yampier_backend-uploads:/data -v "$PWD":/backup alpine tar czf /backup/uploads-$(date +%F).tgz -C /data .
 ```
 
 Para restaurar sobre la base real, primero hacer un backup del estado actual
@@ -448,7 +451,10 @@ No pongas rangos amplios ni públicos en `TRUSTED_PROXIES`.
 | `APP_PUBLIC_URL` | `http://localhost:5173` | URL del sitio para los enlaces de los emails |
 | `MAIL_DRIVER` | vacío | `smtp`, `log` (solo desarrollo) o vacío (sin envío) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | vacío / 587 | Envío SMTP |
-| `ALLOWED_ORIGIN`, `PORT`, `UPLOADS_DIR`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | | Sin cambios |
+| `ALLOWED_ORIGIN` | `http://localhost:5173` | Origen(es) del frontend permitidos por CORS, separados por coma |
+| `PORT` | `8080` | Puerto HTTP (en Render lo define la plataforma) |
+| `UPLOADS_DIR` | `./uploads` | Solo para migrar a MongoDB imágenes guardadas en disco por versiones anteriores |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | vacío | Admin inicial: se crea una sola vez si no existe |
 
 ## Calidad: lint, formato y tests
 
@@ -491,7 +497,7 @@ muestra como SKIP). Para correrlos: `docker compose up -d mongo`.
   seña, fechas) vive en el backend, no solo en el frontend.
 - Búsquedas: el texto del usuario se escapa (`regexp.QuoteMeta`) antes de usarse
   en Mongo; `sort`, `availability` y `status` solo aceptan valores de una lista.
-- CORS con un único origen explícito (`ALLOWED_ORIGIN`), nunca `*`.
+- CORS solo para los orígenes configurados en `ALLOWED_ORIGIN` (lista explícita), nunca `*`.
 - Roles en el token y `tokenVersion` verificada contra la base en cada
   request; autorización por dueño en reservas de clientes (una ajena da 404).
 - Contraseñas con bcrypt; tokens de recuperación aleatorios, guardados como hash.

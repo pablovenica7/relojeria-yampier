@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	"relojeria-yampier/internal/httpx"
@@ -23,15 +24,26 @@ func Chain(h http.Handler, mws ...func(http.Handler) http.Handler) http.Handler 
 	return h
 }
 
-// CORS permite un único origen explícito, nunca "*": el panel envía un token
-// Bearer y solo el frontend configurado puede usarlo desde el navegador.
-func CORS(allowedOrigin string) func(http.Handler) http.Handler {
+// CORS permite solo los orígenes configurados (ALLOWED_ORIGIN, separados por
+// coma), nunca "*": el panel envía un token Bearer y solo el frontend propio
+// puede usarlo desde el navegador. Se responde con el origen exacto del
+// request si está en la lista; si no, sin cabeceras CORS (el navegador bloquea).
+func CORS(allowedOrigins string) func(http.Handler) http.Handler {
+	allowed := map[string]bool{}
+	for _, o := range strings.Split(allowedOrigins, ",") {
+		if o = strings.TrimRight(strings.TrimSpace(o), "/"); o != "" {
+			allowed[o] = true
+		}
+	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-			w.Header().Set("Vary", "Origin")
+			w.Header().Add("Vary", "Origin")
+			if origin := r.Header.Get("Origin"); allowed[origin] {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+				w.Header().Set("Access-Control-Max-Age", "600")
+			}
 			if r.Method == http.MethodOptions {
 				w.WriteHeader(http.StatusNoContent)
 				return

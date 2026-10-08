@@ -14,6 +14,7 @@ type handlers struct {
 	accounts     *controller.AccountHandler
 	inquiries    *controller.InquiryHandler
 	admin        *controller.AdminHandler
+	images       *controller.ImageHandler
 	auth         *middleware.Auth
 }
 
@@ -87,8 +88,8 @@ func (a *App) routes(h handlers) http.Handler {
 	// Cualquier otra ruta /api/ responde 404 en JSON (no texto plano).
 	mux.HandleFunc("/api/", controller.NotFound)
 
-	// Imágenes subidas, servidas de forma pública.
-	mux.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(a.Services.Uploads.Dir()))))
+	// Imágenes subidas desde el Admin (guardadas en MongoDB), públicas.
+	mux.HandleFunc("GET /uploads/{name}", h.images.Serve)
 
 	return middleware.Chain(mux,
 		middleware.RequestLog(a.log, proxies),

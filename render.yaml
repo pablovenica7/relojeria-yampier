@@ -1,0 +1,86 @@
+# Blueprint de Render: despliega backend (Docker) y frontend (sitio estático)
+# desde GitHub. Cada push a main vuelve a construir y publicar solo la parte
+# que cambió (buildFilter). Guía completa: DEPLOY.md
+#
+# Los valores con "sync: false" NO están en este archivo: Render los pide al
+# crear el Blueprint y quedan guardados como secretos del servicio.
+services:
+  # --- Backend Go ---
+  - type: web
+    name: relojeria-yampier-api
+    runtime: docker
+    plan: free # pasar a "starter" para que no se duerma (ver DEPLOY.md)
+    region: virginia # misma zona que el cluster de MongoDB Atlas (AWS us-east-1)
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SEED_DEMO_DATA
+        value: "false"
+      - key: MONGO_DB
+        value: relojeria_yampier
+      - key: MONGO_URI # connection string de Atlas (secreto)
+        sync: false
+      - key: JWT_SECRET # Render genera un valor aleatorio largo
+        generateValue: true
+      - key: ALLOWED_ORIGIN # URL del frontend, ej. https://relojeria-yampier.onrender.com
+        sync: false
+      - key: APP_PUBLIC_URL # misma URL del frontend (enlaces en emails)
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD # solo se usa para crear el admin la primera vez
+        sync: false
+      - key: TRUSTED_PROXIES # proxy de Render (red privada) → IP real del cliente
+        value: 10.0.0.0/8
+      - key: RESERVATION_SWEEP_INTERVAL
+        value: 5m
+
+  # --- Frontend React/Vite ---
+  - type: web
+    name: relojeria-yampier
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - frontend/**
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: VITE_API_URL # ej. https://relojeria-yampier-api.onrender.com/api
+        sync: false
+      - key: VITE_WHATSAPP_NUMBER
+        sync: false
+      - key: VITE_CONTACT_EMAIL
+        sync: false
+      - key: VITE_INSTAGRAM_URL
+        sync: false
+      - key: VITE_FACEBOOK_URL
+        sync: false
+    # SPA: cualquier ruta (/relojes, /mi-cuenta, /admin/login...) carga
+    # index.html y la resuelve React Router. Los archivos reales se sirven igual.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

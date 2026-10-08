@@ -63,6 +63,11 @@ backend/
   (condición + cambio en un solo `FindOneAndUpdate`, nunca "leer, restar en
   Go, guardar").
 
+- **Imágenes**: `service/upload.go` valida el contenido real y las guarda en
+  MongoDB (GridFS, bucket `uploads`, en `repository/image.go`); se sirven en
+  `GET /uploads/{name}` con caché inmutable. No dependen del disco del
+  contenedor, así que sobreviven a los redeploys del hosting.
+
 ## Errores
 
 Los services devuelven `*domain.Error` con un tipo (`ErrValidation`,

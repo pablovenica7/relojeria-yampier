@@ -56,6 +56,7 @@ func New(cfg config.Config, db *database.DB, log *slog.Logger) *App {
 		inquiries    *repository.InquiryRepository
 		moves        *repository.StockMovementRepository
 		resets       *repository.PasswordResetRepository
+		images       *repository.ImageRepository
 	}{
 		watches:      repository.NewWatchRepository(db.Collection(database.CollWatches)),
 		reservations: repository.NewReservationRepository(db.Collection(database.CollReservations)),
@@ -64,6 +65,7 @@ func New(cfg config.Config, db *database.DB, log *slog.Logger) *App {
 		inquiries:    repository.NewInquiryRepository(db.Collection(database.CollInquiries)),
 		moves:        repository.NewStockMovementRepository(db.Collection(database.CollStockMovements)),
 		resets:       repository.NewPasswordResetRepository(db.Collection(database.CollPasswordResets)),
+		images:       repository.NewImageRepository(db.DB),
 	}
 	tokens := auth.NewTokenManager(cfg.JWTSecret)
 
@@ -78,7 +80,7 @@ func New(cfg config.Config, db *database.DB, log *slog.Logger) *App {
 		PasswordReset: service.NewPasswordResetService(repos.customers, repos.resets, mail.New(cfg.Mail, log), cfg.PublicURL, log, nil),
 		Inquiries:     service.NewInquiryService(repos.inquiries, repos.watches, nil),
 		Dashboard:     service.NewDashboardService(repos.reservations, repos.watches, repos.inquiries, reservations, nil),
-		Uploads:       service.NewUploadService(cfg.UploadsDir, nil),
+		Uploads:       service.NewUploadService(repos.images, nil),
 	}
 
 	a := &App{cfg: cfg, db: db, log: log, Tokens: tokens, Services: svc}
@@ -88,6 +90,7 @@ func New(cfg config.Config, db *database.DB, log *slog.Logger) *App {
 		accounts:     controller.NewAccountHandler(svc.Customers, svc.PasswordReset, svc.AdminAuth, log),
 		inquiries:    controller.NewInquiryHandler(svc.Inquiries),
 		admin:        controller.NewAdminHandler(svc.Dashboard, svc.Customers, svc.Stock, svc.Uploads),
+		images:       controller.NewImageHandler(svc.Uploads),
 		auth:         middleware.NewAuth(tokens, svc.AdminAuth, svc.Customers),
 	})
 	return a
@@ -98,7 +101,7 @@ func (a *App) Handler() http.Handler { return a.handler }
 
 // Prepare corre las tareas de arranque de la base: backfill aditivo de
 // documentos viejos (antes de los índices: completa modelKey/brandKey),
-// índices y seeds.
+// índices, seeds y migración de imágenes que estaban en disco.
 func (a *App) Prepare(ctx context.Context) {
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
@@ -108,6 +111,7 @@ func (a *App) Prepare(ctx context.Context) {
 	if a.cfg.SeedDemoData {
 		a.db.SeedDemoWatches(ctx, a.log)
 	}
+	a.Services.Uploads.ImportLegacyDir(ctx, a.cfg.UploadsDir, a.log)
 }
 
 // Run levanta el servidor HTTP y el vencimiento periódico de reservas, y los
