@@ -133,6 +133,7 @@
   width: 40px; height: 40px;
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
+  background: transparent; /* sin esto el navegador pinta su gris de botón */
   color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
               border-color var(--duration-fast) var(--ease-out),
@@ -177,12 +178,15 @@
   .nav-dropdown-toggle { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
   .nav-dropdown-panel {
     position: static; transform: none; opacity: 1; visibility: visible;
+    background: transparent;
     box-shadow: none; border: 0; border-left: 1px solid var(--border);
     border-radius: 0; margin: 0 0 var(--space-2) var(--space-3);
     max-height: 0; overflow: hidden; padding: 0 0 0 var(--space-4);
     transition: max-height var(--duration-base) var(--ease-out);
   }
-  .nav-dropdown-panel.open { max-height: 200px; padding-top: var(--space-2); padding-bottom: var(--space-2); }
+  /* transform: none también al abrir: si no, gana el translateX(-50%) del
+     escritorio y los links quedan fuera de la pantalla. */
+  .nav-dropdown-panel.open { transform: none; max-height: 200px; padding-top: var(--space-2); padding-bottom: var(--space-2); }
   .nav-toggle { display: inline-flex; }
   .nav-user {
     width: 100%; height: auto; justify-content: flex-start;
