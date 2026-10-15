@@ -23,10 +23,43 @@ export default function Navbar() {
 
   // Fondo del navbar al hacer scroll.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16)
+    const onScroll = () => {
+      // Con el menú abierto el body está fijo y scrollY vale 0: no cambiar la
+      // altura de la barra (correría la página y no volvería al mismo lugar).
+      if (document.body.style.position === 'fixed') return
+      setScrolled(window.scrollY > 16)
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Menú mobile abierto: la página de fondo no scrollea. En iOS Safari
+  // `overflow: hidden` en el body no frena el swipe, por eso se fija el body
+  // en su posición actual y al cerrar se vuelve exactamente al mismo scroll.
+  useEffect(() => {
+    if (!menuOpen) return
+    const { body, documentElement: html } = document
+    const scrollY = window.scrollY
+    const prev = { position: body.style.position, top: body.style.top, left: body.style.left, right: body.style.right }
+    Object.assign(body.style, { position: 'fixed', top: `-${scrollY}px`, left: '0', right: '0' })
+    return () => {
+      Object.assign(body.style, prev)
+      // Sin animación: html tiene scroll-behavior: smooth.
+      const behavior = html.style.scrollBehavior
+      html.style.scrollBehavior = 'auto'
+      window.scrollTo(0, scrollY)
+      html.style.scrollBehavior = behavior
+    }
+  }, [menuOpen])
+
+  // Si la pantalla pasa a tamaño desktop (rotación de tablet) con el menú
+  // abierto, se cierra: si no, el body quedaría bloqueado sin menú visible.
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 992px)')
+    const onChange = (e) => { if (e.matches) setMenuOpen(false) }
+    desktop.addEventListener('change', onChange)
+    return () => desktop.removeEventListener('change', onChange)
   }, [])
 
   // Cerrar con Escape y al hacer click fuera del navbar (accesibilidad de teclado).
@@ -44,7 +77,7 @@ export default function Navbar() {
   }, [])
 
   return (
-    <nav ref={navRef} className={`site-nav ${scrolled ? 'scrolled' : ''}`} aria-label="Principal">
+    <nav ref={navRef} className={`site-nav ${scrolled ? 'scrolled' : ''} ${menuOpen ? 'menu-open' : ''}`} aria-label="Principal">
       <div className="container d-flex align-items-center justify-content-between">
         <Link to="/" className="brand" onClick={closeAll}>YAMPIER</Link>
 

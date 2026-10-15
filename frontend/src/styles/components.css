@@ -170,8 +170,15 @@
     background: var(--bg);
     padding: var(--space-6) var(--space-5);
     overflow-y: auto;
+    overscroll-behavior: contain; /* el scroll del menú no se pasa a la página */
   }
   .nav-links.open { display: flex; }
+  /* Con el menú abierto la barra no puede tener backdrop-filter: convertiría a
+     la barra en el contenedor del overlay fixed y lo achicaría a unos px.
+     Fondo opaco porque la página bloqueada queda debajo. */
+  .site-nav.menu-open { background: var(--bg); backdrop-filter: none; }
+  /* El overlay empieza donde termina la barra, también con la barra achicada. */
+  .site-nav.scrolled .nav-links { top: var(--nav-height-scrolled); }
   .nav-link-item { width: 100%; padding: var(--space-4) 0; font-size: var(--text-md); }
   .nav-link-item::after { display: none; }
   .nav-dropdown { width: 100%; }
