@@ -8,8 +8,8 @@ import StockBadge from '../../components/ui/StockBadge'
 import { formatCurrency, parseARS } from '../../utils/formatCurrency'
 import { RESERVATION_STATUS as S, dateInputValue, expiryFromDate } from '../../utils/reservationStatus'
 import swal from '../../utils/swal'
+import { EMAIL_RE } from '../../utils/validation'
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const DEFAULT_HOLD_DAYS = 3
 
 function defaultExpiry() {

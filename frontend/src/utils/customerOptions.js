@@ -1,3 +1,5 @@
+import { EMAIL_RE } from './validation'
+
 // Opciones de cuenta de cliente. Las claves deben coincidir con
 // backend/internal/domain/customer.go; las etiquetas son lo que ve el usuario.
 
@@ -60,7 +62,6 @@ export function isAddressEmpty(a) {
   return !a || ['street', 'number', 'floor', 'apartment', 'postalCode', 'city', 'province'].every(k => !String(a[k] || '').trim())
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const NAME_RE = /^\p{L}[\p{L}'’ .-]*$/u
 
 /**

@@ -10,7 +10,6 @@ var (
 	ErrNotFound          = errors.New("not found")
 	ErrConflict          = errors.New("conflict")
 	ErrUnauthorized      = errors.New("unauthorized")
-	ErrForbidden         = errors.New("forbidden")
 	ErrOutOfStock        = errors.New("out of stock")
 	ErrInvalidTransition = errors.New("invalid transition")
 	ErrConcurrentUpdate  = errors.New("concurrent update")
@@ -57,4 +56,3 @@ func Conflict(code, msg string) error {
 func Unauthorized(code, msg string) error {
 	return &Error{Kind: ErrUnauthorized, Code: code, Message: msg}
 }
-func Forbidden(msg string) error { return &Error{Kind: ErrForbidden, Message: msg} }

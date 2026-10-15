@@ -63,8 +63,6 @@ func StatusFor(kind error) int {
 		return http.StatusBadRequest
 	case errors.Is(kind, domain.ErrUnauthorized):
 		return http.StatusUnauthorized
-	case errors.Is(kind, domain.ErrForbidden):
-		return http.StatusForbidden
 	case errors.Is(kind, domain.ErrNotFound):
 		return http.StatusNotFound
 	case errors.Is(kind, domain.ErrConflict), errors.Is(kind, domain.ErrOutOfStock),

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { sendInquiry } from '../../services/inquiriesService'
+import { EMAIL_RE } from '../../utils/validation'
 import { getWatch } from '../../services/watchesService'
 import RevealOnScroll from '../../components/RevealOnScroll/RevealOnScroll'
 import FormField from '../../components/ui/FormField'
@@ -8,7 +9,6 @@ import Button from '../../components/ui/Button'
 import swal from '../../utils/swal'
 import { business, contact, mailtoUrl, whatsappUrl } from '../../utils/siteConfig'
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function validate(form) {
   const errors = {}

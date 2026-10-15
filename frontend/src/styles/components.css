@@ -272,7 +272,6 @@
 
 /* ============ LAYOUT / SECTIONS ============ */
 .section { padding: var(--space-11) 0; }
-.section-tight { padding: var(--space-8) 0; }
 .section-alt { background: var(--bg-elevated); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .section-header { max-width: 620px; margin-bottom: var(--space-8); }
 .section-header p { font-size: var(--text-md); }

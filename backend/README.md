@@ -71,10 +71,12 @@ backend/
 ## Errores
 
 Los services devuelven `*domain.Error` con un tipo (`ErrValidation`,
-`ErrNotFound`, `ErrConflict`, `ErrUnauthorized`, `ErrForbidden`,
-`ErrOutOfStock`, `ErrInvalidTransition`, `ErrConcurrentUpdate`). `httpx.WriteError`
-los traduce a 400/401/403/404/409 en un solo lugar. Cualquier otro error es
-un 500 genérico: el detalle interno va al log, nunca al cliente.
+`ErrNotFound`, `ErrConflict`, `ErrUnauthorized`, `ErrOutOfStock`,
+`ErrInvalidTransition`, `ErrConcurrentUpdate`). `httpx.WriteError` los traduce
+a 400/401/404/409 en un solo lugar. Cualquier otro error es un 500 genérico:
+el detalle interno va al log, nunca al cliente. El 403 (rol equivocado: un
+cliente en una ruta de Admin o al revés) lo responde directamente
+`middleware.Auth`.
 
 ## Dependencias e interfaces
 
