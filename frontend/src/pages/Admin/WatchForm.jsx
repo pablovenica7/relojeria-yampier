@@ -8,6 +8,7 @@ import StockBadge from '../../components/ui/StockBadge'
 import swal from '../../utils/swal'
 import { emptyWatchForm, toWatchPayload, validateWatchForm, watchToForm } from '../../utils/watchForm'
 import { MANUAL_MOVEMENT_TYPES } from '../../utils/stockMovements'
+import { resizeImageFile } from '../../utils/resizeImage'
 
 export default function WatchForm() {
   const { id } = useParams()
@@ -43,7 +44,7 @@ export default function WatchForm() {
     if (!file) return
     setUploading(true)
     try {
-      const { url } = await uploadWatchImage(file)
+      const { url } = await uploadWatchImage(await resizeImageFile(file))
       setForm(f => ({ ...f, image: url }))
     } catch (err) {
       swal.fire({ icon: 'error', title: 'No se pudo subir la imagen', text: err.message })

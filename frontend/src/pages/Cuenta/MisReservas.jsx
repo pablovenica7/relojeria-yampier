@@ -6,7 +6,8 @@ import { SkeletonLines } from '../../components/ui/Skeleton'
 import { useAsync } from '../../hooks/useAsync'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { imageUrl } from '../../utils/imageUrl'
-import { CUSTOMER_STATUS_HELP, RESERVATION_STATUS as S, customerReservationLabel, isFinalStatus } from '../../utils/reservationStatus'
+import SafeImage from '../../components/ui/SafeImage'
+import { CUSTOMER_STATUS_HELP, RESERVATION_STATUS as S, customerReservationLabel, isExpirable, isFinalStatus } from '../../utils/reservationStatus'
 import { business } from '../../utils/siteConfig'
 import swal from '../../utils/swal'
 
@@ -55,9 +56,10 @@ export default function MisReservas() {
             {items.map(r => (
               <li key={r.id} className="my-reservation">
                 <div className="my-reservation-img">
-                  {r.watchImage
-                    ? <img src={imageUrl(r.watchImage)} alt={`Reloj ${r.watchName}`} loading="lazy" width="120" height="120" />
-                    : <span aria-hidden="true">—</span>}
+                  <SafeImage
+                    src={r.watchImage && imageUrl(r.watchImage)} alt={`Reloj ${r.watchName}`} loading="lazy" width="120" height="120"
+                    fallback={<span aria-hidden="true">—</span>}
+                  />
                 </div>
                 <div className="my-reservation-body">
                   <div className="d-flex justify-content-between flex-wrap gap-2">
@@ -73,7 +75,8 @@ export default function MisReservas() {
                     <div><dt>Precio reservado</dt><dd>{formatCurrency(r.priceAtReservation) || 'A confirmar'}</dd></div>
                     <div><dt>Solicitada</dt><dd>{fmtDate(r.createdAt)}</dd></div>
                     <div><dt>Seña</dt><dd>{formatCurrency(r.depositAmount) || '—'}</dd></div>
-                    <div><dt>Vence</dt><dd>{fmtDate(r.expiresAt)}</dd></div>
+                    {/* Solo pendientes y confirmadas vencen: en los demás estados la fecha no aplica. */}
+                    <div><dt>Vence</dt><dd>{isExpirable(r.status) ? fmtDate(r.expiresAt) : '—'}</dd></div>
                   </dl>
                   <p className="my-reservation-help">{CUSTOMER_STATUS_HELP[r.status]}</p>
                   {r.canCancel && (

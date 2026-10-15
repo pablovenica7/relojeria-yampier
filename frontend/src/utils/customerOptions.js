@@ -1,5 +1,5 @@
 // Opciones de cuenta de cliente. Las claves deben coincidir con
-// backend/customers.go; las etiquetas son lo que ve el usuario.
+// backend/internal/domain/customer.go; las etiquetas son lo que ve el usuario.
 
 export const TAX_CONDITIONS = [
   { value: 'consumer_final', label: 'Consumidor final' },

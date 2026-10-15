@@ -1,4 +1,4 @@
-// Tipos de movimiento de stock: deben coincidir con backend/models.go.
+// Tipos de movimiento de stock: deben coincidir con backend/internal/domain/stock_movement.go.
 export const MOVEMENT_TYPES = [
   { value: 'stock_entry', label: 'Ingreso de mercadería' },
   { value: 'manual_adjustment', label: 'Ajuste manual' },

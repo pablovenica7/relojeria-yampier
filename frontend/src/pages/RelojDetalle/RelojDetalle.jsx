@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getWatch } from '../../services/watchesService'
 import WatchClock from '../../components/WatchClock/WatchClock'
+import { useImageFailed } from '../../hooks/useImageFailed'
 import RevealOnScroll from '../../components/RevealOnScroll/RevealOnScroll'
 import ReservationSteps from '../../components/ReservationSteps/ReservationSteps'
 import EmptyState from '../../components/ui/EmptyState'
@@ -47,6 +48,7 @@ export default function RelojDetalle() {
   const { id } = useParams()
   const fetcher = useCallback(() => getWatch(id), [id])
   const { state, data: w } = useAsync(fetcher, [id])
+  const [imageFailed, onImageError] = useImageFailed(w?.image)
 
   if (state === 'error') {
     return (
@@ -88,9 +90,9 @@ export default function RelojDetalle() {
         <div className="row g-5 mt-2 align-items-start">
           <div className="col-md-6">
             <RevealOnScroll y={0}>
-              <div className={`detail-ph ${w.image ? 'has-image' : ''}`}>
-                {w.image
-                  ? <img src={imageUrl(w.image)} alt={`Reloj ${w.name}`} width="800" height="800" />
+              <div className={`detail-ph ${w.image && !imageFailed ? 'has-image' : ''}`}>
+                {w.image && !imageFailed
+                  ? <img src={imageUrl(w.image)} alt={`Reloj ${w.name}`} onError={onImageError} width="800" height="800" />
                   : <WatchClock hour={10} minute={8 + (w.id?.length || 1) * 3} label={w.name} />}
               </div>
             </RevealOnScroll>

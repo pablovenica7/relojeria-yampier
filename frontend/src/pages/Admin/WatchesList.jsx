@@ -4,6 +4,7 @@ import {
   adjustWatchStock, adminListWatches, archiveWatch, deleteWatch, restoreWatch,
 } from '../../services/adminWatchesService'
 import { imageUrl } from '../../utils/imageUrl'
+import SafeImage from '../../components/ui/SafeImage'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { AVAILABILITY_FILTERS } from '../../utils/stock'
 import EmptyState from '../../components/ui/EmptyState'
@@ -196,9 +197,10 @@ export default function WatchesList() {
                 {items.map(w => (
                   <tr key={w.id} className={w.archivedAt ? 'is-archived' : ''}>
                     <td>
-                      {w.image
-                        ? <img src={imageUrl(w.image)} alt={w.name} className="admin-thumb" loading="lazy" />
-                        : <div className="admin-thumb admin-thumb-empty" aria-hidden="true">Sin foto</div>}
+                      <SafeImage
+                        src={w.image && imageUrl(w.image)} alt={w.name} className="admin-thumb" loading="lazy"
+                        fallback={<div className="admin-thumb admin-thumb-empty" aria-hidden="true">{w.image ? 'Foto no disponible' : 'Sin foto'}</div>}
+                      />
                     </td>
                     <td>
                       {w.name}

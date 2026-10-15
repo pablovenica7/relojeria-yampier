@@ -1,7 +1,7 @@
 // Disponibilidad derivada de stockQuantity. El backend ya la calcula
 // (campo `availability`), pero se deriva también acá para que la UI nunca
 // muestre algo distinto a la cantidad real. Debe coincidir con
-// availabilityFor() en backend/catalog.go.
+// AvailabilityFor() en backend/internal/domain/watch.go.
 export const AVAILABILITY = {
   IN_STOCK: 'in_stock',
   LAST_UNIT: 'last_unit',

@@ -1,4 +1,4 @@
-// Estados de reserva: deben coincidir con backend/reservations.go.
+// Estados de reserva: deben coincidir con backend/internal/domain/reservation.go.
 export const RESERVATION_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',

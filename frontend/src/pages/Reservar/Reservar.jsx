@@ -12,6 +12,7 @@ import StockBadge from '../../components/ui/StockBadge'
 import { SkeletonLines } from '../../components/ui/Skeleton'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { imageUrl } from '../../utils/imageUrl'
+import SafeImage from '../../components/ui/SafeImage'
 import { isAvailable } from '../../utils/stock'
 
 /**
@@ -95,7 +96,7 @@ export default function Reservar() {
 
         <div className="reserve-summary">
           <div className="my-reservation-img">
-            {w.image && <img src={imageUrl(w.image)} alt={`Reloj ${w.name}`} width="120" height="120" />}
+            <SafeImage src={w.image && imageUrl(w.image)} alt={`Reloj ${w.name}`} width="120" height="120" />
           </div>
           <div>
             <p className="eyebrow mb-1">{w.brand}</p>

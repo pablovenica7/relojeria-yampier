@@ -1,0 +1,6 @@
+# Sitio público indexable; panel y áreas privadas fuera de los buscadores.
+User-agent: *
+Disallow: /admin
+Disallow: /mi-cuenta
+Disallow: /reservar/
+Disallow: /restablecer-contrasena

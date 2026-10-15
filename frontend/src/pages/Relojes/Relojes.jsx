@@ -40,7 +40,7 @@ export default function Relojes() {
           <span className="eyebrow">Catálogo</span>
           <h2>Relojes {CATALOG_BRAND} {subtitle}</h2>
           <p>
-            Consultá disponibilidad y reservá por WhatsApp o email. El pago se
+            Consultá disponibilidad o pedí tu reserva desde el sitio. El pago se
             realiza en nuestro local.
           </p>
         </div>

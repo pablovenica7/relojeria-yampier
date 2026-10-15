@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import WatchClock from '../../components/WatchClock/WatchClock'
+import EmptyState from '../../components/ui/EmptyState'
 import WatchCard from '../../components/WatchCard/WatchCard'
 import SplitText from '../../components/SplitText/SplitText'
 import RevealOnScroll from '../../components/RevealOnScroll/RevealOnScroll'
@@ -82,7 +83,23 @@ export default function Home() {
 
           <div className="mt-8">
             {state === 'loading' && <SkeletonCardGrid count={4} />}
-            {state === 'ok' && (
+            {state === 'ok' && featured.length === 0 && (
+              <EmptyState
+                icon="—"
+                title="Pronto vas a ver acá nuestra selección"
+                description="Mientras tanto, consultanos por el modelo que buscás."
+                action={<Link to="/contacto" className="btn btn-secondary btn-sm">Consultar</Link>}
+              />
+            )}
+            {state === 'error' && (
+              <EmptyState
+                icon="!"
+                title="No pudimos cargar los relojes"
+                description="Probá de nuevo en unos segundos."
+                action={<Link to="/relojes" className="btn btn-secondary btn-sm">Ver catálogo</Link>}
+              />
+            )}
+            {state === 'ok' && featured.length > 0 && (
               <div className="card-grid">
                 {featured.slice(0, 4).map((w, i) => (
                   <RevealOnScroll delay={i * 0.06} key={w.id}><WatchCard watch={w} /></RevealOnScroll>
