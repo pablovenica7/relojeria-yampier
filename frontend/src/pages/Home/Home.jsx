@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'motion/react'
+import { m } from 'motion/react'
 import WatchClock from '../../components/WatchClock/WatchClock'
 import EmptyState from '../../components/ui/EmptyState'
 import WatchCard from '../../components/WatchCard/WatchCard'
@@ -36,7 +36,7 @@ export default function Home() {
             <div className="col-lg-6 order-2 order-lg-1">
               <span className="eyebrow hero-eyebrow">Relojería · Córdoba</span>
               <SplitText text="El tiempo, en buenas manos." className="mb-4" />
-              <motion.p
+              <m.p
                 className="hero-lead mb-5"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -44,8 +44,8 @@ export default function Home() {
               >
                 Venta, reparación y mantenimiento de relojes en el centro de Córdoba.
                 Consultá disponibilidad online y reservá tu reloj con nuestro local.
-              </motion.p>
-              <motion.div
+              </m.p>
+              <m.div
                 className="hero-actions"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -53,17 +53,17 @@ export default function Home() {
               >
                 <Link to="/relojes" className="btn btn-primary">Ver relojes</Link>
                 <Link to="/como-reservar" className="btn btn-secondary">Cómo reservar</Link>
-              </motion.div>
+              </m.div>
             </div>
             <div className="col-lg-6 order-1 order-lg-2">
-              <motion.div
+              <m.div
                 className="hero-watch"
                 initial={{ opacity: 0, scale: 0.94 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               >
                 <WatchClock live label="Reloj Yampier con la hora actual" />
-              </motion.div>
+              </m.div>
             </div>
           </div>
         </div>

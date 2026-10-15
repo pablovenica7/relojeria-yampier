@@ -5,18 +5,21 @@ import Home from './pages/Home/Home'
 import Relojes from './pages/Relojes/Relojes'
 import RelojDetalle from './pages/RelojDetalle/RelojDetalle'
 import Servicios from './pages/Servicios/Servicios'
-import Contacto from './pages/Contacto/Contacto'
-import ComoReservar from './pages/ComoReservar/ComoReservar'
 import NotFound from './pages/NotFound/NotFound'
 import ProtectedRoute from './components/Admin/ProtectedRoute'
 import CustomerRoute from './components/Customer/CustomerRoute'
 import { CustomerAuthProvider } from './context/CustomerAuthContext'
-import Ingresar from './pages/Cuenta/Ingresar'
-import CrearCuenta from './pages/Cuenta/CrearCuenta'
-import RecuperarContrasena from './pages/Cuenta/RecuperarContrasena'
-import RestablecerContrasena from './pages/Cuenta/RestablecerContrasena'
-import Privacidad from './pages/Legal/Privacidad'
-import TerminosReserva from './pages/Legal/TerminosReserva'
+
+// Páginas secundarias del sitio público (contacto, cuenta, legales): no las
+// necesita quien entra al inicio o al catálogo, así que van en chunks aparte.
+const Contacto = lazy(() => import('./pages/Contacto/Contacto'))
+const ComoReservar = lazy(() => import('./pages/ComoReservar/ComoReservar'))
+const Ingresar = lazy(() => import('./pages/Cuenta/Ingresar'))
+const CrearCuenta = lazy(() => import('./pages/Cuenta/CrearCuenta'))
+const RecuperarContrasena = lazy(() => import('./pages/Cuenta/RecuperarContrasena'))
+const RestablecerContrasena = lazy(() => import('./pages/Cuenta/RestablecerContrasena'))
+const Privacidad = lazy(() => import('./pages/Legal/Privacidad'))
+const TerminosReserva = lazy(() => import('./pages/Legal/TerminosReserva'))
 
 // Páginas de cliente con sesión: chunk aparte (no las usa la mayoría de las visitas).
 const MiCuenta = lazy(() => import('./pages/Cuenta/MiCuenta'))
@@ -58,16 +61,16 @@ export default function App() {
         <Route path="/relojes/:genero" element={<Relojes />} />
         <Route path="/reloj/:id" element={<RelojDetalle />} />
         <Route path="/servicios" element={<Servicios />} />
-        <Route path="/contacto" element={<Contacto />} />
-        <Route path="/como-reservar" element={<ComoReservar />} />
+        <Route path="/contacto" element={<Suspense fallback={<RouteFallback />}><Contacto /></Suspense>} />
+        <Route path="/como-reservar" element={<Suspense fallback={<RouteFallback />}><ComoReservar /></Suspense>} />
         {/* Ruta anterior: se redirige para no romper links ya compartidos. */}
         <Route path="/mi-reserva" element={<Navigate to="/como-reservar" replace />} />
-        <Route path="/privacidad" element={<Privacidad />} />
-        <Route path="/terminos-de-reserva" element={<TerminosReserva />} />
-        <Route path="/ingresar" element={<Ingresar />} />
-        <Route path="/crear-cuenta" element={<CrearCuenta />} />
-        <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
-        <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
+        <Route path="/privacidad" element={<Suspense fallback={<RouteFallback />}><Privacidad /></Suspense>} />
+        <Route path="/terminos-de-reserva" element={<Suspense fallback={<RouteFallback />}><TerminosReserva /></Suspense>} />
+        <Route path="/ingresar" element={<Suspense fallback={<RouteFallback />}><Ingresar /></Suspense>} />
+        <Route path="/crear-cuenta" element={<Suspense fallback={<RouteFallback />}><CrearCuenta /></Suspense>} />
+        <Route path="/recuperar-contrasena" element={<Suspense fallback={<RouteFallback />}><RecuperarContrasena /></Suspense>} />
+        <Route path="/restablecer-contrasena" element={<Suspense fallback={<RouteFallback />}><RestablecerContrasena /></Suspense>} />
         <Route path="/mi-cuenta" element={<CustomerRoute><Suspense fallback={<RouteFallback />}><MiCuenta /></Suspense></CustomerRoute>} />
         <Route path="/mi-cuenta/reservas" element={<CustomerRoute><Suspense fallback={<RouteFallback />}><MisReservas /></Suspense></CustomerRoute>} />
         <Route path="/reservar/:id" element={<CustomerRoute><Suspense fallback={<RouteFallback />}><Reservar /></Suspense></CustomerRoute>} />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { LazyMotion, domAnimation } from 'motion/react'
 import Navbar from '../Navbar/Navbar'
 import Footer from '../Footer/Footer'
 import Loader from '../Loader/Loader'
@@ -27,8 +28,11 @@ export default function SiteLayout() {
     return () => clearTimeout(t)
   }, [])
 
+  // LazyMotion + domAnimation: solo las funciones de animación que usa el
+  // sitio (animate, variants, whileInView), no el paquete completo de motion.
+  // strict: falla en desarrollo si alguien vuelve a usar <motion.*> completo.
   return (
-    <>
+    <LazyMotion features={domAnimation} strict>
       <a href="#main-content" className="skip-link">Saltar al contenido</a>
       <Loader visible={showLoader} />
       <Navbar />
@@ -37,6 +41,6 @@ export default function SiteLayout() {
       </main>
       <Footer />
       <BackToTop />
-    </>
+    </LazyMotion>
   )
 }
